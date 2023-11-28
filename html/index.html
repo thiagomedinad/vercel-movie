@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movie Guru</title>
+<link rel="icon" type="image/png" href="../images/favicon.jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    background-color: #000000;
+    color: #fff;
+  }
+  .header {
+      /* Make sure your header is a flex container if it's not already */
+      display: flex;
+      align-items: center; /* Aligns items vertically center */
+      justify-content: space-between; /* Spreads the child elements out */
+      /* ... other styles ... */
+    }
+
+  .logo {
+    height: 50px; /* You can adjust this as needed */
+    margin-right: 20px; /* Add some space to the right of the logo */
+  }
+
+  /* New style for the centered text */
+  .special-recommendations {
+    text-align: center;
+    margin: 20px 0; /* Add some vertical margin */
+    font-size: 1.5em; /* Make the font larger, adjust as needed */
+    /* Add additional styling as required */
+  }
+  .header {
+    background-color: #000000;
+    padding: 20px;
+    text-align: center;
+  }
+  .header h1 {
+    margin: 0;
+    color: #E50914;
+  }
+  .movie-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding: 20px;
+  }
+  .movie-container img {
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Original shadow */
+      transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out; /* Smooth transition for effects */
+    }
+
+    .movie-container img:hover {
+      transform: translateY(-10px); /* Keeps your floating effect */
+      box-shadow: 0 10px 20px rgba(167, 24, 24, 0.5); /* Light red shadow on hover */
+    }
+  .movie-title {
+    text-align: center;
+    font-size: 16px;
+    margin-top: 8px;
+  }
+  .footer {
+    background-color: #000000;
+    padding: 20px;
+    text-align: center;
+  }
+  .recommend-button {
+    background-color: #E50914; /* Button color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .recommend-button:hover {
+    background-color: #f00; /* Button hover color */
+  }
+  .clickable-image {
+    cursor: pointer;
+  }
+  .hidden {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <img src="../images/logo.jpeg" alt="Movie Guru Logo" class="logo">
+    <!-- ... other header content ... -->
+  </div>
+
+  <!-- Separate div for the centered text -->
+  <div class="special-recommendations">
+    Escolha o filme que você mais gosta
+  </div>
+
+<div class="movie-grid">
+  <!-- Empty movie containers where the posters will be displayed by JS -->
+  <div id="moviePoster1" class="movie-container"></div>
+  <div id="moviePoster2" class="movie-container"></div>
+  <div id="moviePoster3" class="movie-container"></div>
+  <div id="moviePoster4" class="movie-container"></div>
+  <div id="moviePoster5" class="movie-container"></div>
+</div>
+
+<div class="footer">
+  <!-- <button class="recommend-button" onclick="fetchRandomMovies()">Novas opções</button> -->
+</div>
+
+<script>
+
+// async function fetchRecommendedMovie() {
+//   try {
+//     const response = await fetch('http://localhost:5000/recommend');
+//     const data = await response.json();
+//     const recommended_movie = data.recommendation;
+//     const recommended_poster = await getMoviePoster(recommended_movie);
+
+//     // Assuming the response will have the recommended movie data
+//     const recommendedMovieDiv = document.createElement('div');
+//     recommendedMovieDiv.className = 'movie-container';
+//     recommendedMovieDiv.innerHTML = `
+//       <img src="${recommended_poster}" alt="${movie.Series_Title} Poster" class="clickable-image">
+//       <p class="movie-title">${movie.Series_Title} (${movie.Released_Year})</p>
+//     `;
+
+//     // Clear the movie grid and append the recommended movie
+//     const movieGrid = document.querySelector('.movie-grid');
+//     movieGrid.innerHTML = '';
+//     movieGrid.appendChild(recommendedMovieDiv);
+//   } catch (error) {
+//     console.error('Error fetching the recommended movie:', error);
+//   }
+// }
+
+// JavaScript function to fetch random movies and display them
+let recommended_movies = [];
+let clickCount = 0;
+
+async function fetchRandomMovies() {
+  if (clickCount >= 3) {
+    displayRecommendedMovies();
+    return;
+  }
+
+  const { movies, posters } = await fetchRandomMoviesData();
+  populateMovies(movies, posters);
+}
+
+async function fetchRandomMoviesData() {
+  const response = await fetch('http://thi.sof-town.tech/random-movies');
+  const movies = await response.json();
+
+  const posterPromises = movies.map(movie => getMoviePoster(movie.Series_Title));
+  const posters = await Promise.all(posterPromises);
+
+  return { movies, posters };
+}
+
+async function populateMovies(movies, posters) {
+  for (let i = 1; i <= 5; i++) {
+    const movieDiv = document.getElementById(`moviePoster${i}`);
+    movieDiv.innerHTML = ''; // Clear the movie container
+    movieDiv.removeEventListener('click', movieClickListener); // Remove previous listener
+  }
+
+  posters.forEach((poster, index) => {
+    const movie = movies[index];
+    const movieDiv = document.getElementById(`moviePoster${index + 1}`);
+    if (movieDiv && poster) {
+      movieDiv.innerHTML = `
+        <img src="${poster}" alt="${movie.Series_Title} Poster" class="clickable-image">
+        <p class="movie-title">${movie.Series_Title} (${movie.Released_Year})</p>
+      `;
+
+      movieDiv.movieTitle = movie.Series_Title; // Attach title to the element
+      movieDiv.addEventListener('click', movieClickListener);
+    }
+  });
+}
+
+async function movieClickListener() {
+  clickCount++;
+  const movieName = this.movieTitle; // Use the attached title
+
+  const response = await fetch(`http://localhost:5000/recommend?title=${movieName}`);
+  const data = await response.json();
+  const recommended_movie = data.recommendation;
+
+  // Add the recommended movie to the global array
+  recommended_movies.push(recommended_movie);
+  console.log(recommended_movies); 
+
+  await updateMovieDisplay(movieName);
+}
+
+async function updateMovieDisplay(movieName) {
+  if (clickCount < 3) {
+    const { movies, posters } = await fetchRandomMoviesData();
+    populateMovies(movies, posters);
+  } else {
+    await displayRecommendedMovies();
+  }
+}
+
+async function displayRecommendedMovies() {
+  const movieGrid = document.querySelector('.movie-grid');
+  const footer = document.querySelector('.footer');
+  movieGrid.innerHTML = '';
+  footer.innerHTML = '';
+
+  for (let movie of recommended_movies) {
+    const newMovieDiv = document.createElement('div');
+    newMovieDiv.className = 'movie-container';
+    const recommended_poster = await getMoviePoster(movie);
+    newMovieDiv.innerHTML = `
+      <img src="${recommended_poster}" alt="${movie} Poster" class="clickable-image">
+      <p class="movie-title">${movie}</p>
+    `;
+    movieGrid.appendChild(newMovieDiv);
+  }
+
+  const specialRecommendationsDiv = document.querySelector('.special-recommendations');
+  specialRecommendationsDiv.textContent = 'CERTEZA QUE VOCÊ VAI GOSTAR DESSES TRÊS FILMES! PODE CONFIAR NO SEU GURU';
+
+  clickCount = 0;
+  recommended_movies = [];
+}
+
+function getMoviePoster(movieTitle) {
+  const apiKey = 'e35c7f6c';
+  const apiUrl = `http://www.omdbapi.com/?apikey=${apiKey}&t=${movieTitle}`;
+
+  return fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      return data.Poster;
+    })
+    .catch(error => {
+      console.error('Error fetching movie poster:', error);
+      return '';
+    });
+}
+
+function createRecommendButton() {
+  const footer = document.querySelector('.footer');
+  const button = document.createElement('button');
+  button.className = 'recommend-button';
+  button.textContent = 'Novas opções';
+  button.onclick = fetchRandomMovies;
+  footer.appendChild(button);
+}
+
+window.onload = function() {
+  fetchRandomMovies();
+  createRecommendButton(); // This will create the button when the page loads
+};
+</script>
+
+</body>
+</html>
