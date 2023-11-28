@@ -157,7 +157,7 @@ async function fetchRandomMovies() {
 }
 
 async function fetchRandomMoviesData() {
-  const response = await fetch('http://thi.sof-town.tech/random-movies');
+  const response = await fetch('http://js.sof-town.tech/random-movies');
   const movies = await response.json();
 
   const posterPromises = movies.map(movie => getMoviePoster(movie.Series_Title));
@@ -192,7 +192,7 @@ async function movieClickListener() {
   clickCount++;
   const movieName = this.movieTitle; // Use the attached title
 
-  const response = await fetch(`http://localhost:5000/recommend?title=${movieName}`);
+  const response = await fetch(`http://py.sof-town.tech/recommend?tittle=${movieName}`);
   const data = await response.json();
   const recommended_movie = data.recommendation;
 
